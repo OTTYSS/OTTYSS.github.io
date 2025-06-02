@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Заполнение с линией наклона 82.5 градусов</title>
+  <style>
+    @font-face {
+      font-family: 'MarkinLT';
+      src: url('MarkinLT-UltraBold.woff2') format('woff2');
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'MarkinLT', sans-serif;
+      background-color: #000;
+      color: white;
+    }
+
+    .image-wrapper {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .color-img,
+    .gray-img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .gray-img {
+      filter: grayscale(100%);
+      z-index: 1;
+    }
+
+    .color-img {
+      z-index: 2;
+      clip-path: polygon(0% 100%, 0% 100%, 0% 100%);
+      transition: clip-path 0.1s linear;
+    }
+
+    .percentage {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 13em;
+      font-weight: bold;
+      z-index: 3;
+      color: white;
+      text-shadow: 2px 2px 5px black;
+      font-family: 'MarkinLT', sans-serif;
+    }
+
+    /* Новый стиль для логотипа */
+    .logo {
+      position: absolute;
+      top: 20px; /* Отступ сверху */
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 4; /* Чтобы был выше остальных элементов */
+      max-width: 400px; /* Максимальная ширина логотипа, можно менять */
+      height: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="image-wrapper">
+    <img src="PQ2_logo_light.png" alt="Логотип PQ2" class="logo" />
+    <img src="https://wallpapercave.com/wp/wp6721811.png" alt="Изображение" class="gray-img" />
+    <img src="https://wallpapercave.com/wp/wp6721811.png" alt="Изображение" class="color-img" id="colorImage" />
+    <div class="percentage" id="percentLabel">0%</div>
+  </div>
+
+  <script>
+    const targetPercent = 76.39; // Процент заполнения
+    const duration = 1000; // Длительность анимации в миллисекундах
+
+    const colorImage = document.getElementById('colorImage');
+    const percentLabel = document.getElementById('percentLabel');
+
+    const angleDeg = 82.4;
+    const tanAngle = Math.tan(angleDeg * Math.PI / 180);
+
+    // Минимальное значение xTop для корректного отображения нижней точки
+    const minXTop = 100 / tanAngle;
+
+    let current = 0;
+    const frameRate = 1000 / 60;
+    const increment = targetPercent / (duration / frameRate);
+
+    const counter = setInterval(() => {
+      current += increment;
+      if (current > targetPercent) current = targetPercent;
+
+      let xTop = current;
+      let xBottom = xTop < minXTop ? 0 : xTop - minXTop;
+
+      colorImage.style.clipPath = `polygon(
+        0% 100%,
+        ${xBottom.toFixed(2)}% 100%,
+        ${xTop.toFixed(2)}% 0%,
+        0% 0%
+      )`;
+
+      percentLabel.textContent = `${Math.round(current)}%`;
+
+      if (current === targetPercent) {
+        clearInterval(counter);
+      }
+    }, frameRate);
+  </script>
+</body>
+</html>
