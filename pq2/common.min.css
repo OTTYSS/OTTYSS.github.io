@@ -94,7 +94,7 @@ dd {
 @media screen and (max-width: 980px) {
     .headerLogo {
         position: relative;
-        width: 26%;
+        width: 20%;
         display: block;
         top: 0;
         left: 4%;
@@ -115,14 +115,15 @@ dd {
 @media screen and (max-width: 980px) {
     .pcNavBox {
     display: flex;
-    justify-content: right;
+    justify-content: flex-end;
     max-width: 980px;
     position: relative;
-    width: 110%;
+    width: 100%;
     margin: 0 auto;
     top: -80px;
     overflow-x: clip
     }
+    
 }
 
 .pcNavList {
@@ -151,18 +152,18 @@ dd {
 }
 
 .pcNavList .pcNavItem.is-news {
-    max-width: 236px;
-    width: 14.9%;
+    max-width: 412px;
+    width: 24.9%;
 }
 
 .pcNavList .pcNavItem.is-chara {
-    max-width: 431px;
+    max-width: 312px;
     width: 24.9%;
 }
 
 .pcNavList .pcNavItem.is-school {
-    max-width: 312px;
-    width: 17.9%;
+    max-width: 252px;
+    width: 24.9%;
 }
 
 .pcNavList .pcNavItem:before {
