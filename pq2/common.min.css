@@ -1,0 +1,389 @@
+/*! destyle.css v4.0.0 | MIT License | https://github.com/nicolas-cusan/destyle.min.css */
+*,
+::before,
+::after {
+    box-sizing: border-box;
+    border-width: 0;
+    background: none;
+    border-style: solid
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+    line-height: 1.15;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0)
+}
+
+body {
+    margin: 0;
+    padding: 0
+}
+
+main {
+    display: block
+}
+
+p,
+table,
+blockquote,
+address,
+pre,
+iframe,
+form,
+figure,
+dl {
+    margin: 0
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin: 0;
+    font-size: inherit;
+    font-weight: inherit
+}
+
+ul,
+
+ol {
+    margin: 0;
+    padding: 0;
+    list-style: none
+}
+
+dt {
+    font-weight: 700
+}
+
+dd {
+    margin-left: 0
+}
+
+
+.headerWrap {
+    width: 100%;
+    height: 0px;
+    border-bottom: none;
+    background: none
+}
+
+@media screen and (max-width: 980px) {
+    .headerWrap {
+        height: auto;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 99;
+        background: none;
+        border: none
+    }
+}
+
+.headerLogo {
+    position: fixed;
+    top: 10px;
+    left: 1%;
+    width: 13%;
+    z-index: 3;
+    max-width: 560px
+}
+
+@media screen and (max-width: 980px) {
+    .headerLogo {
+        position: relative;
+        width: 26%;
+        display: block;
+        top: 0;
+        left: 4%;
+        padding: 1.5% 0 1%
+    }
+}
+
+.pcNavBox {
+    display: flex;
+    position: relative;
+    z-index: 2;
+    max-width: 1496px;
+    width: 100%;
+    margin: 0 auto;
+    overflow-x: clip
+}
+
+@media screen and (max-width: 980px) {
+    .pcNavBox {
+    display: flex;
+    justify-content: right;
+    max-width: 980px;
+    position: relative;
+    width: 110%;
+    margin: 0 auto;
+    top: -80px;
+    overflow-x: clip
+    }
+}
+
+.pcNavList {
+    position: fixed; /* Сделать элемент фиксированным */
+    top: 0; /* Устанавливаем, чтобы элемент оставался сверху */
+    left: 0;
+    width: 100%; /* Ширина 100% для того, чтобы элемент растягивался на всю ширину экрана */
+    display: flex;
+    justify-content: center;
+    z-index: 2; /* Чтобы элемент был поверх других */
+    background-color: none; /* Можно добавить фон, чтобы не было видно через элемент */
+    padding-left: 12%;
+}
+
+.pcNavList .pcNavItem {
+    position: relative;
+    bottom: -30px;
+    padding: 0 2%;
+}
+
+.pcNavList .pcNavItem img {
+    position: relative;
+    z-index: 1;
+    transform: rotate(-10deg);
+    transition: .3s;
+}
+
+.pcNavList .pcNavItem.is-news {
+    max-width: 236px;
+    width: 14.9%;
+}
+
+.pcNavList .pcNavItem.is-chara {
+    max-width: 431px;
+    width: 24.9%;
+}
+
+.pcNavList .pcNavItem.is-school {
+    max-width: 312px;
+    width: 17.9%;
+}
+
+.pcNavList .pcNavItem:before {
+    content: "";
+    position: absolute;
+    left: 100%;
+    bottom: 160%;
+    z-index: 0;
+    display: block;
+    width: 100px;
+    background: red;
+    transform: translateX(-50%) rotate(45deg);
+    transition: .3s;
+    aspect-ratio: 9/18;
+}
+
+@media(hover: hover) {
+    .pcNavList .pcNavItem:hover img {
+        transform: rotate(0deg);
+    }
+
+    .pcNavList .pcNavItem:hover:before {
+        left: 55%;
+        bottom: -20px;
+    }
+}
+
+
+.spNavWrap {
+    display: none
+}
+
+@media screen and (max-width: 980px) {
+    .spNavWrap {
+        display: block
+    }
+}
+
+.spNavBgBox.is-on::before {
+    opacity: 1;
+    transform: translateX(0);
+    -webkit-transform: translateX(0);
+    -moz-transform: translateX(0);
+    -ms-transform: translateX(0);
+    -o-transform: translateX(0)
+}
+
+.spNavBtn {
+    position: fixed;
+    top: .3%;
+    right: 1em;
+    z-index: 102;
+    width: 14%;
+    max-width: 60px;
+    background: red;
+    border: solid #ff0000 2px;
+    box-shadow: .5em .5em 0 #000;
+    aspect-ratio: 1/1
+}
+
+.spNavBtn .spNavLine {
+    position: absolute;
+    top: calc(25% - 2px);
+    left: 50%;
+    width: 80%;
+    height: 4px;
+    background: #fff;
+    transform: translate(-50%, 0);
+    transition: .3s;
+    -webkit-transition: .3s;
+    -moz-transition: .3s;
+    -ms-transition: .3s;
+    -o-transition: .3s
+}
+
+.spNavBtn .spNavLine:nth-child(2) {
+    top: calc(50% - 2px);
+    transform: translate(-50%, 0%) rotate(0)
+}
+
+.spNavBtn .spNavLine:nth-child(3) {
+    top: calc(75% - 2px);
+    transform: translate(-50%, 0%) rotate(0)
+}
+
+.spNavBtn.is-on {
+    box-shadow: .3em .3em 0 #fff
+}
+
+.spNavBtn.is-on .spNavLine:nth-child(1) {
+    opacity: 0
+}
+
+.spNavBtn.is-on .spNavLine:nth-child(2) {
+    top: 50%;
+    transform: translate(-50%, -50%) rotate(45deg)
+}
+
+.spNavBtn.is-on .spNavLine:nth-child(3) {
+    top: 50%;
+    transform: translate(-50%, -50%) rotate(-45deg)
+}
+
+
+img {
+    width: 100%;
+    height: auto
+}
+
+a {
+    cursor: pointer
+}
+
+body {
+    width: 100%;
+    color: #fff;
+    font-size: 1.171875vw;
+    font-family: "Noto Sans", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 900;
+    font-style: normal;
+    line-height: 1.8;
+    text-wrap: pretty
+}
+
+@media screen and (max-width: 980px) {
+    body {
+        font-size: 2.32vw
+    }
+}
+
+
+.-onlyPc {
+    display: block
+}
+
+@media screen and (max-width: 980px) {
+    .-onlyPc {
+        display: none
+    }
+}
+
+.-onlySp {
+    display: none
+}
+
+@media screen and (max-width: 980px) {
+    .-onlySp {
+        display: block
+    }
+}
+
+.snsList .snsListItem {
+    display: flex;
+    align-items: flex-end;
+    width: 20%;
+    margin: auto;
+    margin-bottom: 3%
+}
+
+.snsList .snsListItem li {
+    width: 33.3333333333%;
+    padding: 0 6%
+}
+
+@media screen and (max-width: 980px) {
+    .snsList .snsListItem {
+        width: 40%;
+        margin-bottom: 5%
+    }
+
+    .snsList .snsListItem li {
+        padding: 0 5%
+    }
+}
+
+ul.featureItemPFList,
+ul.pfListUlItem {
+    width: 94%;
+    margin: auto;
+    display: flex
+}
+
+ul.featureItemPFList li,
+ul.pfListUlItem li {
+    width: 25%;
+    padding: 0 1%
+}
+
+ul.featureItemPFList li.app,
+ul.pfListUlItem li.app {
+    width: 21%
+}
+
+ul.featureItemPFList li.and,
+ul.pfListUlItem li.and {
+    width: 23%
+}
+
+ul.featureItemPFList li.steam,
+ul.pfListUlItem li.steam {
+    width: 22.5%
+}
+
+ul.featureItemPFList li.gpg,
+ul.pfListUlItem li.gpg {
+    width: 32%
+}
+
+@media screen and (max-width: 980px) {
+
+    ul.featureItemPFList,
+    ul.pfListUlItem {
+        width: 92%;
+        margin: 0 auto
+    }
+
+    ul.featureItemPFList li,
+    ul.pfListUlItem li {
+        padding: 0 1%
+    }
+}
+
+/*# sourceMappingURL=common.min.css.map */
