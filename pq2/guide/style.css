@@ -322,7 +322,7 @@ footer {
 .accordion-item {
     border-color: #f04e29 !important;
     border-radius: 0px !important;
-    background-color: #141414 !important;
+    background-color: #1b1b1b  !important;
 }
 
 .accordion-button {
@@ -469,7 +469,7 @@ footer {
 /* Contenedor de imágenes */
 .image-container {
     position: relative;
-    padding-top: 56.25%;
+    padding-top: 60%;
 }
 
 .image-container img {
@@ -673,4 +673,8 @@ body {
 .hr-sidebar {
     margin: 0;
     margin-bottom: 4px;
+}
+
+.fallback-image {
+  filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.9));
 }
