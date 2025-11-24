@@ -2,104 +2,370 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>OTS | перевод Persona Q2</title>
-  <link rel="icon" href="PQ2_logo_light.png" type="image/png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OTS Portfolio</title>
+  <meta name="description" content="Cinematic Portfolio" />
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Babel для поддержки JSX прямо в браузере -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
+  <!-- Шрифты -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+  
   <style>
-    @font-face {
-      font-family: 'MarkinLT';
-      src: url('MarkinLT-UltraBold.woff2') format('woff2');
-      font-weight: normal;
-      font-style: normal;
-    }
-
-    html, body {
+    body {
+      background-color: #050505;
+      color: white;
       margin: 0;
       padding: 0;
-      height: 100%;
-      overflow: hidden;
-      font-family: 'MarkinLT', sans-serif;
-      background-color: #000;
-      color: white;
-    }
-
-    .image-wrapper {
-      display: flex;
-      width: 100vw;
+      overflow: hidden; /* Блокируем скролл */
+      font-family: 'Inter', sans-serif;
       height: 100vh;
+      width: 100vw;
+    }
+    
+    /* Скрываем скроллбар */
+    ::-webkit-scrollbar {
+      width: 0px;
+      background: transparent;
     }
 
-    .half {
-      flex: 1;
-      position: relative;
-      overflow: hidden;
-      cursor: pointer;
-    }
-
-    .half img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.3s ease;
-    }
-
-    /* При наведении на левую или правую часть увеличиваем изображение */
-    .half:hover img {
-      transform: scale(1.1);
-    }
-
-    /* При наведении на левую часть */
-    .left {
-      background-color: #4CAF50;
-    }
-
-    /* При наведении на правую часть */
-    .right {
-      background-color: #f44336;
-    }
-
-    /* Логотипы */
-    .logo {
-      position: absolute;
-      bottom: 50px;
-      left: 25%;
-      transform: translateX(-50%);
-      z-index: 4;
-      max-width: 400px;
-      height: auto;
-    }
-
-    .logo_2 {
-      position: absolute;
-      bottom: 50px;
-      left: 75%;
-      transform: translateX(-50%);
-      z-index: 4;
-      max-width: 400px;
-      height: auto;
-    }
-
-    /* Изображение слева с выравниванием по правому краю */
-    .left img {
-      position: absolute;
-      right: 0; /* Прижимаем к правому краю */
-      top: 0;   /* Устанавливаем верхний отступ */
-      width: auto; /* Ширина изображения автоматически, чтобы оно не растягивалось */
-      height: 100%; /* Высота 100% от родительского блока */
-      object-fit: cover; /* Сохранение пропорций изображения */
+    /* Утилита для скрытия курсора на десктопе, если используется кастомный */
+    @media (min-width: 768px) {
+      body {
+        cursor: none;
+      }
     }
   </style>
+
+  <!-- Import Map: FIXED to ensure single React instance -->
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.2.0",
+    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+    "framer-motion": "https://esm.sh/framer-motion@10.16.4?deps=react@18.2.0,react-dom@18.2.0",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/"
+  }
+}
+</script>
 </head>
 <body>
-  <div class="image-wrapper">
-    <div class="half left" onclick="window.location.href='P5X.html';">
-      <img src="p5x.png" alt="Изображение слева">
-    </div>
-    <div class="half right" onclick="window.location.href='PQ2.html';">
-      <img src="pq2.jpg" alt="Изображение справа">
-    </div>
-  </div>
-  <img src="P5logo-P5Rdengru-1-2_EN.png" alt="Логотип PQ2" class="logo" />
-  <img src="PQ2_logo_light.png" alt="Логотип PQ2" class="logo_2" />
-  <div class="percentage" id="percentLabel">0%</div>
+  <div id="root"></div>
+
+  <!-- Основной скрипт приложения -->
+  <script type="text/babel" data-type="module">
+    import React, { useState, useEffect, useRef, useCallback } from 'react';
+    import { createRoot } from 'react-dom/client';
+    import { motion, useSpring, useMotionValue } from 'framer-motion';
+
+    // --- КОМПОНЕНТЫ ---
+
+    // 1. NoiseOverlay: Эффект зернистости пленки
+    const NoiseOverlay = () => {
+      return (
+        <div className="pointer-events-none fixed inset-0 z-50 opacity-[0.03] mix-blend-overlay">
+          <svg className="h-full w-full">
+            <filter id="noiseFilter">
+              <feTurbulence
+                type="fractalNoise"
+                baseFrequency="0.8"
+                numOctaves="3"
+                stitchTiles="stitch"
+              />
+            </filter>
+            <rect width="100%" height="100%" filter="url(#noiseFilter)" />
+          </svg>
+        </div>
+      );
+    };
+
+    // 2. CustomCursor: Кастомный курсор
+    const CustomCursor = () => {
+      const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+      const [isPointer, setIsPointer] = useState(false);
+
+      useEffect(() => {
+        const updateMousePosition = (e) => {
+          setMousePosition({ x: e.clientX, y: e.clientY });
+          
+          const target = e.target;
+          // Проверяем, является ли элемент интерактивным
+          const isClickable = 
+            target.tagName === 'A' || 
+            target.tagName === 'BUTTON' || 
+            target.closest('.cursor-pointer');
+          
+          setIsPointer(!!isClickable);
+        };
+
+        window.addEventListener('mousemove', updateMousePosition);
+        return () => window.removeEventListener('mousemove', updateMousePosition);
+      }, []);
+
+      // Не рендерим на мобильных
+      if (typeof window !== 'undefined' && window.innerWidth < 768) return null;
+
+      return (
+        <React.Fragment>
+          {/* Точка курсора */}
+          <motion.div
+            className="fixed top-0 left-0 z-[100] pointer-events-none mix-blend-difference"
+            animate={{
+              x: mousePosition.x - 8,
+              y: mousePosition.y - 8,
+              scale: isPointer ? 1.5 : 1,
+            }}
+            transition={{ type: 'spring', stiffness: 500, damping: 28, mass: 0.5 }}
+          >
+            <div className="h-4 w-4 rounded-full bg-white" />
+          </motion.div>
+          {/* Круг вокруг курсора */}
+          <motion.div
+            className="fixed top-0 left-0 z-[100] pointer-events-none border border-white/50 rounded-full"
+            animate={{
+              x: mousePosition.x - 20,
+              y: mousePosition.y - 20,
+              scale: isPointer ? 1.5 : 1,
+            }}
+            transition={{ type: 'spring', stiffness: 250, damping: 20, mass: 0.8 }}
+            style={{ width: 40, height: 40 }}
+          />
+        </React.Fragment>
+      );
+    };
+
+    // 3. ProjectCard: Карточка проекта
+    const ProjectCard = ({
+      project,
+      isHovered,
+      isDimmed,
+      onMouseEnter,
+      onMouseLeave,
+      index,
+    }) => {
+      const ref = useRef(null);
+      
+      // Параллакс эффекты
+      const x = useMotionValue(0);
+      const y = useMotionValue(0);
+
+      const mouseXSpring = useSpring(x, { stiffness: 300, damping: 30 });
+      const mouseYSpring = useSpring(y, { stiffness: 300, damping: 30 });
+
+      const handleMouseMove = useCallback(
+        (e) => {
+          if (!ref.current) return;
+          const rect = ref.current.getBoundingClientRect();
+          const centerX = rect.left + rect.width / 2;
+          const centerY = rect.top + rect.height / 2;
+          
+          const mouseX = (e.clientX - centerX) / (rect.width / 2);
+          const mouseY = (e.clientY - centerY) / (rect.height / 2);
+
+          x.set(-mouseX * 20); 
+          y.set(-mouseY * 20);
+        },
+        [x, y]
+      );
+
+      const handleReset = () => {
+        x.set(0);
+        y.set(0);
+        onMouseLeave();
+      };
+
+      const handleCardClick = () => {
+        console.log(`Navigating to ${project.link}`);
+        window.location.href = project.link;
+      };
+
+      return (
+        <motion.div
+          ref={ref}
+          layout
+          className={`relative h-full flex flex-col overflow-hidden cursor-pointer group`}
+          style={{
+            backgroundColor: project.accentColor,
+            transformOrigin: 'bottom left',
+          }}
+          initial={{ flexGrow: 1, opacity: 0, y: 100 }}
+          animate={{ 
+            flexGrow: isHovered ? 2.5 : 1,
+            opacity: 1,
+            y: 0,
+            filter: isDimmed ? 'grayscale(100%) brightness(0.4)' : 'grayscale(0%) brightness(1)',
+          }}
+          transition={{ 
+            flexGrow: { type: 'spring', stiffness: 200, damping: 25 },
+            filter: { duration: 0.4 },
+            opacity: { duration: 0.5, delay: index * 0.1 },
+            y: { duration: 0.5, delay: index * 0.1 }
+          }}
+          onMouseEnter={onMouseEnter}
+          onMouseLeave={handleReset}
+          onMouseMove={handleMouseMove}
+          onClick={handleCardClick}
+        >
+          {/* Контейнер с обратным скосом (Counter-Skew) */}
+          <div 
+            className="absolute inset-0 w-[150%] -ml-[25%] h-full flex flex-col items-center justify-end md:transform md:skew-x-[8deg]"
+            style={{ transformOrigin: 'bottom left' }}
+          >
+            {/* Изображение с параллаксом */}
+            <motion.div 
+                className="absolute inset-0 w-full h-full bg-cover bg-center"
+                style={{ 
+                    backgroundImage: `url(${project.imageUrl})`,
+                    scale: 1.4,
+                    x: mouseXSpring,
+                    y: mouseYSpring,
+                }}
+            />
+
+            {/* Градиент */}
+            <div className={`absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent transition-opacity duration-500 ${isHovered ? 'opacity-100' : 'opacity-60'}`} />
+
+            {/* Контент */}
+            <div className="relative z-10 w-full p-8 pb-16 md:pb-12 flex flex-col items-center text-center">
+                {/* ЛОГОТИП ПРОЕКТА */}
+                {project.logoUrl ? (
+                     <img 
+                     src={project.logoUrl} 
+                     alt={project.title}
+                     className="w-48 md:w-64 h-auto object-contain mb-4 drop-shadow-2xl transition-transform duration-500 group-hover:scale-105"
+                   />
+                ) : (
+                    <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter mb-2 drop-shadow-lg">
+                        {project.title}
+                    </h2>
+                )}
+
+                <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ 
+                        opacity: isHovered ? 1 : 0,
+                        height: isHovered ? 'auto' : 0,
+                        y: isHovered ? 0 : 20
+                    }}
+                    className="overflow-hidden"
+                >
+                    <div className="pt-4">
+                        <span className="inline-block px-3 py-1 border border-white/30 rounded-full text-xs font-bold uppercase tracking-widest backdrop-blur-md">
+                            {project.category}
+                        </span>
+                        <p className="mt-2 text-sm text-gray-300 max-w-xs mx-auto">
+                           Нажмите, чтобы скачать
+                        </p>
+                    </div>
+                </motion.div>
+            </div>
+          </div>
+        </motion.div>
+      );
+    };
+
+    // 4. ProjectContainer: Контейнер с общим скосом
+    const ProjectContainer = ({ projects }) => {
+      const [hoveredProjectId, setHoveredProjectId] = useState(null);
+      const SKEW_ANGLE = -8;
+      
+      return (
+        <div className="relative w-full h-full overflow-hidden bg-black">
+          <div 
+            className="flex flex-col md:flex-row h-full w-full md:w-[120%] md:-ml-[10%] transition-all duration-500 ease-out"
+            style={{
+              transform: `skewX(${SKEW_ANGLE}deg)`,
+              transformOrigin: 'bottom left',
+            }}
+          >
+            {projects.map((project, index) => (
+              <ProjectCard
+                key={project.id}
+                index={index}
+                project={project}
+                isHovered={hoveredProjectId === project.id}
+                isDimmed={hoveredProjectId !== null && hoveredProjectId !== project.id}
+                onMouseEnter={() => setHoveredProjectId(project.id)}
+                onMouseLeave={() => setHoveredProjectId(null)}
+              />
+            ))}
+          </div>
+        </div>
+      );
+    };
+
+    // 5. App: Главный компонент и данные
+    const projectsData = [
+      {
+        id: 'p5x',
+        title: '',
+        category: 'Нейроперевод',
+        imageUrl: 'p5x.png',
+        logoUrl: 'P5XLG.png',
+        link: 'p5x.html',
+        accentColor: '#e11e28',
+      },
+      {
+        id: 'pq2',
+        title: '',
+        category: 'Ручной перевод',
+        imageUrl: 'pq2.jpg',
+        logoUrl: 'PQ2_logo.png',
+        link: 'pq2.html',
+        accentColor: '#f58220',
+      },
+      {
+        id: 'rc',
+        title: '',
+        category: 'Нейроперевод',
+        imageUrl: 'rcbg.jpg',
+        logoUrl: 'RC.png',
+        link: 'RC.html',
+        accentColor: '#007cc2',
+      },
+      {
+        id: 'hl',
+        title: '',
+        category: 'Нейроперевод',
+        imageUrl: 'hlbg.jpg',
+        logoUrl: 'logo_en.png',
+        link: 'HL.html',
+        accentColor: '#fab905',
+      },
+    ];
+
+    const App = () => {
+      return (
+        <div className="relative h-screen w-screen overflow-hidden bg-black text-white">
+          <CustomCursor />
+          <NoiseOverlay />
+          
+          <main className="h-full w-full">
+            <ProjectContainer projects={projectsData} />
+          </main>
+
+          <header className="absolute top-6 left-6 md:left-10 z-40 mix-blend-difference pointer-events-none">
+            <h1 className="text-2xl font-black tracking-widest uppercase">OTS</h1>
+            <p className="text-xs tracking-wider opacity-70"></p>
+          </header>
+
+          <footer className="absolute bottom-6 right-6 md:right-10 z-40 mix-blend-difference pointer-events-none hidden md:block">
+            <p className="text-xs font-bold tracking-[0.2em] uppercase opacity-50">
+               Выберите игру
+            </p>
+          </footer>
+        </div>
+      );
+    };
+
+    // Инициализация React
+    const rootElement = document.getElementById('root');
+    const root = createRoot(rootElement);
+    root.render(<App />);
+  </script>
 </body>
 </html>
