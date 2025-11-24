@@ -9,10 +9,10 @@
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   
-  <!-- Babel для поддержки JSX прямо в браузере -->
+  <!-- Babel Standalone -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  
-  <!-- Шрифты -->
+
+  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
   
   <style>
@@ -21,27 +21,54 @@
       color: white;
       margin: 0;
       padding: 0;
-      overflow: hidden; /* Блокируем скролл */
       font-family: 'Inter', sans-serif;
       height: 100vh;
       width: 100vw;
-    }
-    
-    /* Скрываем скроллбар */
-    ::-webkit-scrollbar {
-      width: 0px;
-      background: transparent;
+      overflow: hidden; 
     }
 
-    /* Утилита для скрытия курсора на десктопе, если используется кастомный */
-    @media (min-width: 768px) {
-      body {
-        cursor: none;
-      }
+    /* --- СТИЛИЗАЦИЯ СКРОЛЛБАРА --- */
+    
+    /* Firefox */
+    .custom-scrollbar {
+      scrollbar-width: thin;
+      scrollbar-color: #333 #050505;
+    }
+
+    /* Webkit (Chrome, Safari, Edge) */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;  /* Ширина вертикального скролла */
+      height: 6px; /* Высота горизонтального скролла */
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #050505;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background-color: #333;
+      border-radius: 3px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background-color: #ffffff;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-corner {
+      background: #050505;
+    }
+
+    /* Утилита для скрытия курсора */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
     }
   </style>
 
-  <!-- Import Map: FIXED to ensure single React instance -->
+  <!-- Import Map: FIXED versions to prevent conflicts -->
   <script type="importmap">
 {
   "imports": {
@@ -56,7 +83,7 @@
 <body>
   <div id="root"></div>
 
-  <!-- Основной скрипт приложения -->
+  <!-- ОСНОВНОЙ КОД ПРИЛОЖЕНИЯ -->
   <script type="text/babel" data-type="module">
     import React, { useState, useEffect, useRef, useCallback } from 'react';
     import { createRoot } from 'react-dom/client';
@@ -64,7 +91,7 @@
 
     // --- КОМПОНЕНТЫ ---
 
-    // 1. NoiseOverlay: Эффект зернистости пленки
+    // 1. NoiseOverlay
     const NoiseOverlay = () => {
       return (
         <div className="pointer-events-none fixed inset-0 z-50 opacity-[0.03] mix-blend-overlay">
@@ -83,62 +110,7 @@
       );
     };
 
-    // 2. CustomCursor: Кастомный курсор
-    const CustomCursor = () => {
-      const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-      const [isPointer, setIsPointer] = useState(false);
-
-      useEffect(() => {
-        const updateMousePosition = (e) => {
-          setMousePosition({ x: e.clientX, y: e.clientY });
-          
-          const target = e.target;
-          // Проверяем, является ли элемент интерактивным
-          const isClickable = 
-            target.tagName === 'A' || 
-            target.tagName === 'BUTTON' || 
-            target.closest('.cursor-pointer');
-          
-          setIsPointer(!!isClickable);
-        };
-
-        window.addEventListener('mousemove', updateMousePosition);
-        return () => window.removeEventListener('mousemove', updateMousePosition);
-      }, []);
-
-      // Не рендерим на мобильных
-      if (typeof window !== 'undefined' && window.innerWidth < 768) return null;
-
-      return (
-        <React.Fragment>
-          {/* Точка курсора */}
-          <motion.div
-            className="fixed top-0 left-0 z-[100] pointer-events-none mix-blend-difference"
-            animate={{
-              x: mousePosition.x - 8,
-              y: mousePosition.y - 8,
-              scale: isPointer ? 1.5 : 1,
-            }}
-            transition={{ type: 'spring', stiffness: 500, damping: 28, mass: 0.5 }}
-          >
-            <div className="h-4 w-4 rounded-full bg-white" />
-          </motion.div>
-          {/* Круг вокруг курсора */}
-          <motion.div
-            className="fixed top-0 left-0 z-[100] pointer-events-none border border-white/50 rounded-full"
-            animate={{
-              x: mousePosition.x - 20,
-              y: mousePosition.y - 20,
-              scale: isPointer ? 1.5 : 1,
-            }}
-            transition={{ type: 'spring', stiffness: 250, damping: 20, mass: 0.8 }}
-            style={{ width: 40, height: 40 }}
-          />
-        </React.Fragment>
-      );
-    };
-
-    // 3. ProjectCard: Карточка проекта
+    // 2. ProjectCard
     const ProjectCard = ({
       project,
       isHovered,
@@ -146,6 +118,7 @@
       onMouseEnter,
       onMouseLeave,
       index,
+      enableScroll,
     }) => {
       const ref = useRef(null);
       
@@ -183,18 +156,22 @@
         window.location.href = project.link;
       };
 
+      const containerClasses = enableScroll
+        ? "flex-shrink-0 min-h-[30vh] md:min-h-full w-full md:w-[25vw] md:min-w-[320px]"
+        : "flex-grow";
+
       return (
         <motion.div
           ref={ref}
-          layout
-          className={`relative h-full flex flex-col overflow-hidden cursor-pointer group`}
+          layout={!enableScroll} 
+          className={`relative h-full flex flex-col overflow-hidden cursor-pointer group ${containerClasses}`}
           style={{
             backgroundColor: project.accentColor,
             transformOrigin: 'bottom left',
           }}
-          initial={{ flexGrow: 1, opacity: 0, y: 100 }}
+          initial={{ opacity: 0, y: 100 }}
           animate={{ 
-            flexGrow: isHovered ? 2.5 : 1,
+            flexGrow: !enableScroll && isHovered ? 2.5 : 1, 
             opacity: 1,
             y: 0,
             filter: isDimmed ? 'grayscale(100%) brightness(0.4)' : 'grayscale(0%) brightness(1)',
@@ -210,12 +187,14 @@
           onMouseMove={handleMouseMove}
           onClick={handleCardClick}
         >
-          {/* Контейнер с обратным скосом (Counter-Skew) */}
+          {/* Контейнер с обратным скосом */}
           <div 
-            className="absolute inset-0 w-[150%] -ml-[25%] h-full flex flex-col items-center justify-end md:transform md:skew-x-[8deg]"
+            className={`absolute inset-0 h-full flex flex-col items-center justify-end md:transform md:skew-x-[8deg] ${
+                enableScroll ? 'w-[140%] -ml-[20%]' : 'w-[150%] -ml-[25%]'
+            }`}
             style={{ transformOrigin: 'bottom left' }}
           >
-            {/* Изображение с параллаксом */}
+            {/* Изображение */}
             <motion.div 
                 className="absolute inset-0 w-full h-full bg-cover bg-center"
                 style={{ 
@@ -231,7 +210,6 @@
 
             {/* Контент */}
             <div className="relative z-10 w-full p-8 pb-16 md:pb-12 flex flex-col items-center text-center">
-                {/* ЛОГОТИП ПРОЕКТА */}
                 {project.logoUrl ? (
                      <img 
                      src={project.logoUrl} 
@@ -268,50 +246,20 @@
       );
     };
 
-    // 4. ProjectContainer: Контейнер с общим скосом
-    const ProjectContainer = ({ projects }) => {
-      const [hoveredProjectId, setHoveredProjectId] = useState(null);
-      const SKEW_ANGLE = -8;
-      
-      return (
-        <div className="relative w-full h-full overflow-hidden bg-black">
-          <div 
-            className="flex flex-col md:flex-row h-full w-full md:w-[120%] md:-ml-[10%] transition-all duration-500 ease-out"
-            style={{
-              transform: `skewX(${SKEW_ANGLE}deg)`,
-              transformOrigin: 'bottom left',
-            }}
-          >
-            {projects.map((project, index) => (
-              <ProjectCard
-                key={project.id}
-                index={index}
-                project={project}
-                isHovered={hoveredProjectId === project.id}
-                isDimmed={hoveredProjectId !== null && hoveredProjectId !== project.id}
-                onMouseEnter={() => setHoveredProjectId(project.id)}
-                onMouseLeave={() => setHoveredProjectId(null)}
-              />
-            ))}
-          </div>
-        </div>
-      );
-    };
-
-    // 5. App: Главный компонент и данные
+    // 4. ДАННЫЕ И APP
     const projectsData = [
       {
         id: 'p5x',
-        title: '',
+        title: 'P5X',
         category: 'Нейроперевод',
-        imageUrl: 'p5x.png',
+        imageUrl: 'p5x.png', 
         logoUrl: 'P5XLG.png',
         link: 'P5X.html',
         accentColor: '#e11e28',
       },
       {
         id: 'pq2',
-        title: '',
+        title: 'PQ2',
         category: 'Ручной перевод',
         imageUrl: 'pq2.jpg',
         logoUrl: 'PQ2_logo.png',
@@ -320,51 +268,140 @@
       },
       {
         id: 'rc',
-        title: '',
+        title: 'RC',
         category: 'Нейроперевод',
         imageUrl: 'rcbg.jpg',
         logoUrl: 'RC.png',
-        link: 'RC.html',
+        link: '404.html',
         accentColor: '#007cc2',
       },
       {
         id: 'hl',
-        title: '',
+        title: 'HL',
         category: 'Нейроперевод',
         imageUrl: 'hlbg.jpg',
-        logoUrl: 'logo_en.png',
-        link: 'HL.html',
+        logoUrl: 'hllogo.png',
+        link: '404.html',
+        accentColor: '#fab905',
+      },
+      {
+        id: 'sw',
+        title: 'SW',
+        category: 'Ручной перевод',
+        imageUrl: 'swds1.jpg',
+        logoUrl: 'swds1lg.png',
+        link: '404.html',
         accentColor: '#fab905',
       },
     ];
 
     const App = () => {
+      const [hoveredProjectId, setHoveredProjectId] = useState(null);
+      const [scrollProgress, setScrollProgress] = useState(0);
+      const containerRef = useRef(null);
+      const SKEW_ANGLE = -8;
+      
+      const enableScroll = projectsData.length > 4;
+
+      const handleScroll = () => {
+        if (!containerRef.current) return;
+        const { scrollLeft, scrollWidth, clientWidth, scrollTop, scrollHeight, clientHeight } = containerRef.current;
+        
+        // Определяем направление скролла (мобильные - вертикально, десктоп - горизонтально)
+        const isHorizontal = window.innerWidth >= 768; // 768px = md breakpoint
+        
+        let progress = 0;
+        if (isHorizontal) {
+            const maxScroll = scrollWidth - clientWidth;
+            if (maxScroll > 0) {
+                progress = scrollLeft / maxScroll;
+            }
+        } else {
+            const maxScroll = scrollHeight - clientHeight;
+            if (maxScroll > 0) {
+                progress = scrollTop / maxScroll;
+            }
+        }
+        setScrollProgress(progress);
+      };
+
+      // Обработчик колесика мыши для горизонтального скролла на десктопе
+      useEffect(() => {
+        const container = containerRef.current;
+        if (!enableScroll || !container) return;
+
+        const onWheel = (e) => {
+          // Если десктоп и есть вертикальная прокрутка колеса
+          if (window.innerWidth >= 768 && e.deltaY !== 0) {
+            e.preventDefault(); // Предотвращаем стандартный скролл страницы (если бы он был)
+            container.scrollLeft += e.deltaY; // Крутим по горизонтали
+          }
+        };
+
+        // { passive: false } нужен, чтобы работал preventDefault()
+        container.addEventListener('wheel', onWheel, { passive: false });
+
+        return () => {
+          container.removeEventListener('wheel', onWheel);
+        };
+      }, [enableScroll]);
+
       return (
-        <div className="relative h-screen w-screen overflow-hidden bg-black text-white">
-          <CustomCursor />
+        <div className="relative h-screen w-screen bg-black text-white flex flex-col">
           <NoiseOverlay />
           
-          <main className="h-full w-full">
-            <ProjectContainer projects={projectsData} />
+          <main 
+            ref={containerRef}
+            onScroll={enableScroll ? handleScroll : undefined}
+            className={`relative flex-1 w-full h-full ${enableScroll ? 'overflow-y-auto md:overflow-y-hidden md:overflow-x-auto custom-scrollbar' : 'overflow-hidden'}`}
+          >
+            <div 
+              className={`
+                flex flex-col md:flex-row h-full transition-all duration-500 ease-out
+                ${enableScroll 
+                    ? 'w-full min-w-max md:pl-10 md:pr-10' 
+                    : 'w-full md:w-[120%] md:-ml-[10%]' 
+                 }
+              `}
+              style={{
+                transform: `skewX(${SKEW_ANGLE}deg)`,
+                transformOrigin: 'bottom left',
+              }}
+            >
+              {projectsData.map((project, index) => (
+                <ProjectCard
+                  key={project.id}
+                  index={index}
+                  project={project}
+                  isHovered={hoveredProjectId === project.id}
+                  isDimmed={hoveredProjectId !== null && hoveredProjectId !== project.id}
+                  onMouseEnter={() => setHoveredProjectId(project.id)}
+                  onMouseLeave={() => setHoveredProjectId(null)}
+                  enableScroll={enableScroll}
+                />
+              ))}
+            </div>
           </main>
 
+          {/* Header */}
           <header className="absolute top-6 left-6 md:left-10 z-40 mix-blend-difference pointer-events-none">
-            <h1 className="text-2xl font-black tracking-widest uppercase">OTS</h1>
+            <h1 className="text-2xl font-black tracking-widest uppercase"></h1>
             <p className="text-xs tracking-wider opacity-70"></p>
           </header>
 
+          
+
+          {/* Footer */}
           <footer className="absolute bottom-6 right-6 md:right-10 z-40 mix-blend-difference pointer-events-none hidden md:block">
             <p className="text-xs font-bold tracking-[0.2em] uppercase opacity-50">
-               Выберите игру
+               {enableScroll ? 'Покрути колёсико • ' : ''}Выбери игру
             </p>
           </footer>
         </div>
       );
     };
 
-    // Инициализация React
-    const rootElement = document.getElementById('root');
-    const root = createRoot(rootElement);
+    const root = createRoot(document.getElementById('root'));
     root.render(<App />);
   </script>
 </body>
