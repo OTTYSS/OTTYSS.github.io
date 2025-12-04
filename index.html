@@ -1,408 +1,285 @@
+
 <!DOCTYPE html>
 <html lang="ru">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OTS</title>
-  <meta name="description" content="Переводы всяких игр" />
-  
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Babel Standalone -->
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OTS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,700;1,400&family=Oswald:wght@400;600;700&family=Roboto+Condensed:ital,wght@0,400;0,700;1,700&display=swap" rel="stylesheet">
+    <style>
+      /* Persona 5 specific custom utilities */
+      body {
+        font-family: 'Roboto Condensed', sans-serif;
+        background-color: #000510;
+        overflow-x: hidden;
+      }
+      
+      /* Global Noise Overlay */
+      .bg-noise {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 50;
+        opacity: 0.03;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      }
 
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
-  
-  <style>
-    body {
-      background-color: #050505;
-      color: white;
-      margin: 0;
-      padding: 0;
-      font-family: 'Inter', sans-serif;
-      height: 100vh;
-      width: 100vw;
-      overflow: hidden; 
-    }
+      /* Halftone Pattern */
+      .bg-halftone {
+        background-image: radial-gradient(circle, #2c5bf0 1px, transparent 1px);
+        background-size: 10px 10px;
+      }
 
-    /* --- СТИЛИЗАЦИЯ СКРОЛЛБАРА --- */
-    
-    /* Firefox */
-    .custom-scrollbar {
-      scrollbar-width: thin;
-      scrollbar-color: #333 #050505;
-    }
+      .font-p5-header {
+        font-family: 'Oswald', sans-serif;
+        letter-spacing: 0.05em;
+      }
+      
+      .font-p5-elegant {
+        font-family: 'Cormorant Garamond', serif;
+      }
 
-    /* Webkit (Chrome, Safari, Edge) */
-    .custom-scrollbar::-webkit-scrollbar {
-      width: 6px;  /* Ширина вертикального скролла */
-      height: 6px; /* Высота горизонтального скролла */
-    }
+      /* Polygon Clips */
+      .clip-p5-shard {
+        clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
+      }
+      
+      .clip-p5-slant {
+        clip-path: polygon(10% 0, 100% 0, 90% 100%, 0% 100%);
+      }
 
-    .custom-scrollbar::-webkit-scrollbar-track {
-      background: #050505;
-    }
+      .clip-diamond {
+        clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+      }
 
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background-color: #333;
-      border-radius: 3px;
-    }
+      /* Jagged Tear Clips for Transitions */
+      .clip-jagged {
+         clip-path: polygon(
+           0% 0%, 
+           100% 0%, 
+           100% 100%, 
+           95% 90%, 90% 100%, 85% 90%, 80% 100%, 75% 90%, 70% 100%, 
+           65% 90%, 60% 100%, 55% 90%, 50% 100%, 45% 90%, 40% 100%, 
+           35% 90%, 30% 100%, 25% 90%, 20% 100%, 15% 90%, 10% 100%, 
+           5% 90%, 0% 100%
+         );
+      }
 
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-      background-color: #ffffff;
-    }
+      .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+      }
+      .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+      }
 
-    .custom-scrollbar::-webkit-scrollbar-corner {
-      background: #050505;
-    }
+      /* Pendulum Sway Animation */
+      @keyframes sway {
+        0% { transform: rotate3d(0, 0, 1, -1deg); }
+        100% { transform: rotate3d(0, 0, 1, 1deg); }
+      }
+      .animate-sway {
+        animation: sway 8s ease-in-out infinite alternate;
+        transform-origin: top center;
+        will-change: transform;
+        backface-visibility: hidden;
+      }
+      
+      /* Flash Animation */
+      @keyframes flash {
+        0% { opacity: 0; }
+        50% { opacity: 1; }
+        100% { opacity: 0; }
+      }
+      .animate-flash {
+        animation: flash 0.2s ease-out;
+      }
 
-    /* Утилита для скрытия курсора */
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
-    }
-    .no-scrollbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
-  </style>
+      /* Sheen/Holographic Sweep */
+      @keyframes sheen-sweep {
+        0% { transform: translateX(-150%) skewX(-25deg); opacity: 0; }
+        20% { opacity: 0.4; }
+        50% { opacity: 0; }
+        100% { transform: translateX(250%) skewX(-25deg); opacity: 0; }
+      }
+      .animate-sheen {
+        animation: sheen-sweep 5s infinite ease-in-out;
+        will-change: transform, opacity;
+      }
 
-  <!-- Import Map: FIXED versions to prevent conflicts -->
+      /* Rising Embers */
+      @keyframes ember-rise {
+        0% { transform: translateY(0) rotate(0deg) scale(0.5); opacity: 0; }
+        20% { opacity: 0.8; }
+        100% { transform: translateY(-120px) rotate(180deg) scale(0); opacity: 0; }
+      }
+      .animate-ember {
+        animation: ember-rise 4s infinite linear;
+        will-change: transform, opacity;
+      }
+      
+      /* Subtle Pulse */
+      @keyframes pulse-glow {
+        0%, 100% { opacity: 0.5; }
+        50% { opacity: 1; }
+      }
+      .animate-pulse-glow {
+        animation: pulse-glow 3s infinite ease-in-out;
+      }
+
+      /* --- GLITCH TEXT EFFECT --- */
+      @keyframes glitch {
+        0% { clip-path: polygon(0 2%, 100% 2%, 100% 5%, 0 5%); transform: translate(0); opacity: 1; }
+        2% { clip-path: polygon(0 78%, 100% 78%, 100% 100%, 0 100%); transform: translate(-2px, 1px); }
+        4% { clip-path: polygon(0 78%, 100% 78%, 100% 100%, 0 100%); transform: translate(2px, -1px); }
+        6% { clip-path: polygon(0 14%, 100% 14%, 100% 63%, 0 63%); transform: translate(-2px, 2px); }
+        8% { clip-path: polygon(0 5%, 100% 5%, 100% 27%, 0 27%); transform: translate(0); }
+        10% { clip-path: polygon(0 23%, 100% 23%, 100% 81%, 0 81%); transform: translate(-1px, 2px); }
+        12% { clip-path: polygon(0 32%, 100% 32%, 100% 36%, 0 36%); transform: translate(1px, -2px); }
+        14% { clip-path: polygon(0 68%, 100% 68%, 100% 87%, 0 87%); transform: translate(-2px, 1px); }
+        16% { clip-path: polygon(0 26%, 100% 26%, 100% 41%, 0 41%); transform: translate(2px, -2px); }
+        18% { clip-path: polygon(0 7%, 100% 7%, 100% 21%, 0 21%); transform: translate(0); }
+        20% { clip-path: polygon(0 91%, 100% 91%, 100% 97%, 0 97%); transform: translate(0); }
+        23% { clip-path: polygon(0 15%, 100% 15%, 100% 18%, 0 18%); transform: translate(3px, 0); }
+        25% { clip-path: polygon(0 0, 100% 0, 100% 0, 0 0); transform: translate(0); }
+        30% { clip-path: polygon(0 60%, 100% 60%, 100% 75%, 0 75%); transform: translate(-2px, -1px); }
+        35% { clip-path: polygon(0 10%, 100% 10%, 100% 40%, 0 40%); transform: translate(2px, 2px); }
+        40% { clip-path: polygon(0 45%, 100% 45%, 100% 50%, 0 50%); transform: translate(-1px, -1px); }
+        45% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); transform: translate(0); }
+        50% { clip-path: polygon(0 22%, 100% 22%, 100% 29%, 0 29%); transform: translate(2px, 0); }
+        55% { clip-path: polygon(0 0, 100% 0, 100% 0, 0 0); transform: translate(0); }
+        60% { clip-path: polygon(0 80%, 100% 80%, 100% 85%, 0 85%); transform: translate(-2px, 2px); }
+        70% { clip-path: polygon(0 50%, 100% 50%, 100% 55%, 0 55%); transform: translate(2px, -2px); }
+        80% { clip-path: polygon(0 10%, 100% 10%, 100% 30%, 0 30%); transform: translate(-1px, 1px); }
+        90% { clip-path: polygon(0 30%, 100% 30%, 100% 35%, 0 35%); transform: translate(1px, -1px); }
+        100% { clip-path: polygon(0 2%, 100% 2%, 100% 5%, 0 5%); transform: translate(0); }
+      }
+      
+      .animate-glitch {
+        position: relative;
+        color: white;
+      }
+      .animate-glitch::before,
+      .animate-glitch::after {
+        content: attr(data-text);
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #000;
+      }
+      .animate-glitch::before {
+        left: 2px;
+        text-shadow: -1px 0 #ff00c1;
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+        animation: glitch 4s infinite linear alternate-reverse;
+      }
+      .animate-glitch::after {
+        left: -2px;
+        text-shadow: -1px 0 #00fff9;
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+        animation: glitch 2s infinite linear alternate-reverse;
+      }
+
+      /* --- TRANSITION WIPE --- */
+      @keyframes slide-in-right {
+        0% { transform: translateX(100%) skewX(-15deg); }
+        100% { transform: translateX(-50%) skewX(-15deg); } /* Move past center to cover */
+      }
+      @keyframes slide-out-left {
+        0% { transform: translateX(-50%) skewX(-15deg); } /* Start from cover position */
+        100% { transform: translateX(-200%) skewX(-15deg); }
+      }
+
+      .transition-panel {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        width: 150vw; /* Wider than screen to accommodate skew */
+        z-index: 100;
+        will-change: transform;
+      }
+      
+      /* Custom P5 Cursor */
+      body {
+        cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M0,0 L12,32 L16,18 L32,12 Z" fill="%23FFFFFF" stroke="%23000000" stroke-width="2"/></svg>'), auto;
+      }
+      
+      button, a {
+        cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M0,0 L12,32 L16,18 L32,12 Z" fill="%23FF0000" stroke="%23000000" stroke-width="2"/></svg>'), pointer;
+      }
+      
+      /* Loading Screen Styles */
+      .loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        width: 100vw;
+        background-color: #000;
+        color: #2c5bf0;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 9999;
+      }
+      .loading-hat {
+        animation: sway 2s ease-in-out infinite alternate;
+        margin-bottom: 2rem;
+      }
+      .loading-text {
+        font-family: 'Oswald', sans-serif;
+        font-size: 2rem;
+        letter-spacing: 0.1em;
+        animation: pulse-glow 1.5s infinite;
+      }
+      .loading-subtext {
+        margin-top: 1rem;
+        color: #666;
+        font-size: 0.9rem;
+        max-width: 400px;
+        text-align: center;
+      }
+    </style>
   <script type="importmap">
 {
   "imports": {
-    "react": "https://esm.sh/react@18.2.0",
-    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
-    "framer-motion": "https://esm.sh/framer-motion@10.16.4?deps=react@18.2.0,react-dom@18.2.0",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/"
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0"
   }
 }
 </script>
+<link rel="stylesheet" href="/index.css">
 </head>
-<body>
-  <div id="root"></div>
-
-  <!-- ОСНОВНОЙ КОД ПРИЛОЖЕНИЯ -->
-  <script type="text/babel" data-type="module">
-    import React, { useState, useEffect, useRef, useCallback } from 'react';
-    import { createRoot } from 'react-dom/client';
-    import { motion, useSpring, useMotionValue } from 'framer-motion';
-
-    // --- КОМПОНЕНТЫ ---
-
-    // 1. NoiseOverlay
-    const NoiseOverlay = () => {
-      return (
-        <div className="pointer-events-none fixed inset-0 z-50 opacity-[0.03] mix-blend-overlay">
-          <svg className="h-full w-full">
-            <filter id="noiseFilter">
-              <feTurbulence
-                type="fractalNoise"
-                baseFrequency="0.8"
-                numOctaves="3"
-                stitchTiles="stitch"
-              />
-            </filter>
-            <rect width="100%" height="100%" filter="url(#noiseFilter)" />
-          </svg>
+  <body>
+    <div id="root">
+      <!-- Fallback Loading Screen -->
+      <div class="loading-container">
+        <svg class="loading-hat" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+           <path d="M2 22h20"></path>
+           <path d="M6 22v-3a3 3 0 0 1 3-3h6a3 3 0 0 1 3 3v3"></path>
+           <path d="M12 16V9"></path>
+           <path d="M12 2a5 5 0 0 1 5 5v2H7V7a5 5 0 0 1 5-5z"></path>
+        </svg>
+        <div class="loading-text">TAKE YOUR TIME...</div>
+        <div class="loading-subtext">
+           Я что-то загружаю
         </div>
-      );
-    };
-
-    // 2. ProjectCard
-    const ProjectCard = ({
-      project,
-      isHovered,
-      isDimmed,
-      onMouseEnter,
-      onMouseLeave,
-      index,
-      enableScroll,
-    }) => {
-      const ref = useRef(null);
-      
-      // Параллакс эффекты
-      const x = useMotionValue(0);
-      const y = useMotionValue(0);
-
-      const mouseXSpring = useSpring(x, { stiffness: 300, damping: 30 });
-      const mouseYSpring = useSpring(y, { stiffness: 300, damping: 30 });
-
-      const handleMouseMove = useCallback(
-        (e) => {
-          if (!ref.current) return;
-          const rect = ref.current.getBoundingClientRect();
-          const centerX = rect.left + rect.width / 2;
-          const centerY = rect.top + rect.height / 2;
-          
-          const mouseX = (e.clientX - centerX) / (rect.width / 2);
-          const mouseY = (e.clientY - centerY) / (rect.height / 2);
-
-          x.set(-mouseX * 20); 
-          y.set(-mouseY * 20);
-        },
-        [x, y]
-      );
-
-      const handleReset = () => {
-        x.set(0);
-        y.set(0);
-        onMouseLeave();
-      };
-
-      const handleCardClick = () => {
-        console.log(`Navigating to ${project.link}`);
-        window.location.href = project.link;
-      };
-
-      const containerClasses = enableScroll
-        ? "flex-shrink-0 min-h-[30vh] md:min-h-full w-full md:w-[25vw] md:min-w-[320px]"
-        : "flex-grow";
-
-      return (
-        <motion.div
-          ref={ref}
-          layout={!enableScroll} 
-          className={`relative h-full flex flex-col overflow-hidden cursor-pointer group ${containerClasses}`}
-          style={{
-            backgroundColor: project.accentColor,
-            transformOrigin: 'bottom left',
-          }}
-          initial={{ opacity: 0, y: 100 }}
-          animate={{ 
-            flexGrow: !enableScroll && isHovered ? 2.5 : 1, 
-            opacity: 1,
-            y: 0,
-            filter: isDimmed ? 'grayscale(100%) brightness(0.4)' : 'grayscale(0%) brightness(1)',
-          }}
-          transition={{ 
-            flexGrow: { type: 'spring', stiffness: 200, damping: 25 },
-            filter: { duration: 0.4 },
-            opacity: { duration: 0.5, delay: index * 0.1 },
-            y: { duration: 0.5, delay: index * 0.1 }
-          }}
-          onMouseEnter={onMouseEnter}
-          onMouseLeave={handleReset}
-          onMouseMove={handleMouseMove}
-          onClick={handleCardClick}
-        >
-          {/* Контейнер с обратным скосом */}
-          <div 
-            className={`absolute inset-0 h-full flex flex-col items-center justify-end md:transform md:skew-x-[8deg] ${
-                enableScroll ? 'w-[140%] -ml-[20%]' : 'w-[150%] -ml-[25%]'
-            }`}
-            style={{ transformOrigin: 'bottom left' }}
-          >
-            {/* Изображение */}
-            <motion.div 
-                className="absolute inset-0 w-full h-full bg-cover bg-center"
-                style={{ 
-                    backgroundImage: `url(${project.imageUrl})`,
-                    scale: 1.4,
-                    x: mouseXSpring,
-                    y: mouseYSpring,
-                }}
-            />
-
-            {/* Градиент */}
-            <div className={`absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent transition-opacity duration-500 ${isHovered ? 'opacity-100' : 'opacity-60'}`} />
-
-            {/* Контент */}
-            <div className="relative z-10 w-full p-8 pb-16 md:pb-12 flex flex-col items-center text-center">
-                {project.logoUrl ? (
-                     <img 
-                     src={project.logoUrl} 
-                     alt={project.title}
-                     className="w-48 md:w-64 h-auto object-contain mb-4 drop-shadow-2xl transition-transform duration-500 group-hover:scale-105"
-                   />
-                ) : (
-                    <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter mb-2 drop-shadow-lg">
-                        {project.title}
-                    </h2>
-                )}
-
-                <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ 
-                        opacity: isHovered ? 1 : 0,
-                        height: isHovered ? 'auto' : 0,
-                        y: isHovered ? 0 : 20
-                    }}
-                    className="overflow-hidden"
-                >
-                    <div className="pt-4">
-                        <span className="inline-block px-3 py-1 border border-white/30 rounded-full text-xs font-bold uppercase tracking-widest backdrop-blur-md">
-                            {project.category}
-                        </span>
-                        <p className="mt-2 text-sm text-gray-300 max-w-xs mx-auto">
-                           Нажмите, чтобы скачать
-                        </p>
-                    </div>
-                </motion.div>
-            </div>
-          </div>
-        </motion.div>
-      );
-    };
-
-    // 4. ДАННЫЕ И APP
-    const projectsData = [
-      {
-        id: 'p5x',
-        title: 'P5X',
-        category: 'Нейроперевод',
-        imageUrl: 'p5x.png', 
-        logoUrl: 'P5XLG.png',
-        link: 'P5X.html',
-        accentColor: '#e11e28',
-      },
-      {
-        id: 'pq2',
-        title: 'PQ2',
-        category: 'Ручной перевод',
-        imageUrl: 'pq2.jpg',
-        logoUrl: 'PQ2_logo.png',
-        link: 'PQ2.html',
-        accentColor: '#f58220',
-      },
-      {
-        id: 'rc',
-        title: 'RC',
-        category: 'Нейроперевод',
-        imageUrl: 'rcbg.jpg',
-        logoUrl: 'RC.png',
-        link: '404.html',
-        accentColor: '#007cc2',
-      },
-	  {
-        id: 'sw',
-        title: 'SW',
-        category: 'Ручной перевод',
-        imageUrl: 'swds1.jpg',
-        logoUrl: 'swds1lg.png',
-        link: '404.html',
-        accentColor: '#fab905',
-      },
-      {
-        id: 'hl',
-        title: 'HL',
-        category: 'Нейроперевод',
-        imageUrl: 'hlbg.jpg',
-        logoUrl: 'hllogo.png',
-        link: '404.html',
-        accentColor: '#fab905',
-      },
-    ];
-
-    const App = () => {
-      const [hoveredProjectId, setHoveredProjectId] = useState(null);
-      const [scrollProgress, setScrollProgress] = useState(0);
-      const containerRef = useRef(null);
-      const SKEW_ANGLE = -8;
-      
-      const enableScroll = projectsData.length > 4;
-
-      const handleScroll = () => {
-        if (!containerRef.current) return;
-        const { scrollLeft, scrollWidth, clientWidth, scrollTop, scrollHeight, clientHeight } = containerRef.current;
-        
-        // Определяем направление скролла (мобильные - вертикально, десктоп - горизонтально)
-        const isHorizontal = window.innerWidth >= 768; // 768px = md breakpoint
-        
-        let progress = 0;
-        if (isHorizontal) {
-            const maxScroll = scrollWidth - clientWidth;
-            if (maxScroll > 0) {
-                progress = scrollLeft / maxScroll;
-            }
-        } else {
-            const maxScroll = scrollHeight - clientHeight;
-            if (maxScroll > 0) {
-                progress = scrollTop / maxScroll;
-            }
-        }
-        setScrollProgress(progress);
-      };
-
-      // Обработчик колесика мыши для горизонтального скролла на десктопе
-      useEffect(() => {
-        const container = containerRef.current;
-        if (!enableScroll || !container) return;
-
-        const onWheel = (e) => {
-          // Если десктоп и есть вертикальная прокрутка колеса
-          if (window.innerWidth >= 768 && e.deltaY !== 0) {
-            e.preventDefault(); // Предотвращаем стандартный скролл страницы (если бы он был)
-            container.scrollLeft += e.deltaY; // Крутим по горизонтали
-          }
-        };
-
-        // { passive: false } нужен, чтобы работал preventDefault()
-        container.addEventListener('wheel', onWheel, { passive: false });
-
-        return () => {
-          container.removeEventListener('wheel', onWheel);
-        };
-      }, [enableScroll]);
-
-      return (
-        <div className="relative h-screen w-screen bg-black text-white flex flex-col">
-          <NoiseOverlay />
-          
-          <main 
-            ref={containerRef}
-            onScroll={enableScroll ? handleScroll : undefined}
-            className={`relative flex-1 w-full h-full ${enableScroll ? 'overflow-y-auto md:overflow-y-hidden md:overflow-x-auto custom-scrollbar' : 'overflow-hidden'}`}
-          >
-            <div 
-              className={`
-                flex flex-col md:flex-row h-full transition-all duration-500 ease-out
-                ${enableScroll 
-                    ? 'w-full min-w-max md:pl-10 md:pr-10' 
-                    : 'w-full md:w-[120%] md:-ml-[10%]' 
-                 }
-              `}
-              style={{
-                transform: `skewX(${SKEW_ANGLE}deg)`,
-                transformOrigin: 'bottom left',
-              }}
-            >
-              {projectsData.map((project, index) => (
-                <ProjectCard
-                  key={project.id}
-                  index={index}
-                  project={project}
-                  isHovered={hoveredProjectId === project.id}
-                  isDimmed={hoveredProjectId !== null && hoveredProjectId !== project.id}
-                  onMouseEnter={() => setHoveredProjectId(project.id)}
-                  onMouseLeave={() => setHoveredProjectId(null)}
-                  enableScroll={enableScroll}
-                />
-              ))}
-            </div>
-          </main>
-
-          {/* Header */}
-          <header className="absolute top-6 left-6 md:left-10 z-40 mix-blend-difference pointer-events-none">
-            <h1 className="text-2xl font-black tracking-widest uppercase"></h1>
-            <p className="text-xs tracking-wider opacity-70"></p>
-          </header>
-
-          
-
-          {/* Footer */}
-          <footer className="absolute bottom-6 right-6 md:right-10 z-40 mix-blend-difference pointer-events-none hidden md:block">
-            <p className="text-xs font-bold tracking-[0.2em] uppercase opacity-50">
-               {enableScroll ? 'Покрути колёсико • ' : ''}Выбери игру
-            </p>
-          </footer>
-        </div>
-      );
-    };
-
-    const root = createRoot(document.getElementById('root'));
-    root.render(<App />);
-  </script>
+      </div>
+    </div>
+    <div class="bg-noise"></div>
+    <script type="module" src="./index.tsx"></script>
+  <script type="module" src="/index.tsx"></script>
 </body>
 </html>
