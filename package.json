@@ -1,5 +1,6 @@
 {
-  "name": "phantom-localizations",
+  "name": "OTS",
+  "homepage": "https://ots.ottyss.ru/",
   "private": true,
   "version": "0.0.0",
   "type": "module",
